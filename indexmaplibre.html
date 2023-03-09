@@ -44,7 +44,17 @@ top: 3.5%;
 left: 0;
 width: 422px;
 z-index: 111;
-};
+}
+          #basemaps-wrapper {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(255, 255, 255, 0);
+      }
+      #basemaps {
+        font-size: 16px;
+        padding: 4px 8px;
+      }
     </style>
 <script src=https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js></script>
     <link href=https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css rel="stylesheet" />
@@ -69,55 +79,131 @@ z-index: 111;
         </ul>
     </nav>
 <div id="map"></div>
+          <div id="basemaps-wrapper">
+
+      <select id="basemaps">
+        <option value="ArcGIS:Community">Community</option>
+        <option value="ArcGIS:Streets">Streets</option>
+        <option value="ArcGIS:Navigation">Navigation</option>
+        <option value="ArcGIS:Topographic">Topographic</option>
+        <option value="ArcGIS:LightGray">Light Gray</option>
+        <option value="ArcGIS:DarkGray">Dark gray</option>
+        <option value="ArcGIS:StreetsRelief">Streets Relief</option>
+        <option value="ArcGIS:Imagery:Standard">Imagery</option>
+        <option value="ArcGIS:ChartedTerritory">ChartedTerritory</option>
+        <option value="ArcGIS:ColoredPencil">ColoredPencil</option>
+        <option value="ArcGIS:Nova">Nova</option>
+        <option value="ArcGIS:Midcentury">Midcentury</option>
+        <option value="OSM:Standard">OSM</option>
+        <option value="OSM:Streets">OSM:Streets</option>
+      </select>
+
+    </div>
     <script>
 
-      const apiKey = "AAPK01d3c973b91841e99191a7cb96374713ppA1XdSa_FzdBTpO68P75mXoB6ZHH8JMoore66SKKVDlcN39rMGtvZS59A1c8rEU";
-      const basemapEnum = "ArcGIS:Community";
-      const map = new maplibregl.Map({
-        container: "map", // the id of the div element
-        style: `https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&token=${apiKey}`,
-        zoom: 12, // starting zoom
-        center: [149.131,-35.27] // starting location [longitude, latitude]
-      });
+     const apiKey = "AAPK01d3c973b91841e99191a7cb96374713ppA1XdSa_FzdBTpO68P75mXoB6ZHH8JMoore66SKKVDlcN39rMGtvZS59A1c8rEU";
+
+// Get the basemaps dropdown element
+const basemapsDropdown = document.getElementById('basemaps');
+
+// Add an event listener to the basemaps dropdown
+basemapsDropdown.addEventListener('change', () => {
+  // Get the selected basemap value
+  const basemapEnum = basemapsDropdown.value;
+  
+  // Update the map style with the selected basemap
+  map.setStyle(`https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&token=${apiKey}`);
+ 
+  map.once("styledata", () => {
+  // This code runs once the base style has finished loading.
+
+  map.addSource("hillshade", {
+    type: "raster",
+    tiles: [
+      "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
+    tileSize : 100
+  });
+
+  // Find the first non-background layer in order to add our raster layer before it.
+  const layers = map.getStyle().layers;
+  const bottomLayer = layers.find((layer) => layer.type !== "background");
+
+  map.addLayer(
+    {
+      id: "hillshade-raster",
+      type: "raster",
+      source: "hillshade"
+    },
+
+    bottomLayer.id
+
+  );
+
+  layers.forEach((layer) => {
+    if (layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
+      map.setPaintProperty(layer.id, "fill-opacity", 0.2);
+    }
+  });
+    
+
+});
+ 
+});
+
+// Create the map with the initial basemap
+let basemapEnum = basemapsDropdown.value;
+const map = new maplibregl.Map({
+  container: "map", // the id of the div element
+  style: `https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&token=${apiKey}`,
+  zoom: 12, // starting zoom
+  center: [149.131,-35.27] // starting location [longitude, latitude]
+});
+
+// Add navigation control to the map
 map.addControl(
-new maplibregl.NavigationControl({
-visualizePitch: true,
-showZoom: true,
-showCompass: true
-})
+  new maplibregl.NavigationControl({
+    visualizePitch: true,
+    showZoom: true,
+    showCompass: true
+  })
 );
-      map.once("load", () => {
-        // This code runs once the base style has finished loading.
 
-        map.addSource("hillshade", {
-          type: "raster",
-          tiles: [
-            "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
-          tileSize : 100
-        });
+// Add hillshade layer to the map
+map.once("styledata", () => {
+  // This code runs once the base style has finished loading.
 
-        // Find the first non-background layer in order to add our raster layer before it.
-        const layers = map.getStyle().layers;
-        const bottomLayer = layers.find((layer) => layer.type !== "background");
+  map.addSource("hillshade", {
+    type: "raster",
+    tiles: [
+      "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
+    tileSize : 100
+  });
 
-        map.addLayer(
-          {
-            id: "hillshade-raster",
-            type: "raster",
-            source: "hillshade"
-          },
+  // Find the first non-background layer in order to add our raster layer before it.
+  const layers = map.getStyle().layers;
+  const bottomLayer = layers.find((layer) => layer.type !== "background");
 
-          bottomLayer.id
+  map.addLayer(
+    {
+      id: "hillshade-raster",
+      type: "raster",
+      source: "hillshade"
+    },
 
-        );
+    bottomLayer.id
 
-        layers.forEach((layer) => {
-          if (layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
-            map.setPaintProperty(layer.id, "fill-opacity", 0.2);
-          }
-        });
+  );
 
-      });
+  layers.forEach((layer) => {
+    if (layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
+      map.setPaintProperty(layer.id, "fill-opacity", 0.2);
+    }
+  });
+    
+
+});
+
+
 
     </script>
     
