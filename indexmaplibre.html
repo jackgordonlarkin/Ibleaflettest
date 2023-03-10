@@ -3,14 +3,6 @@
 <html lang="en">
 <head>
  
-     <!-- Load Leaflet from CDN -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
-
-    <!-- Load Esri Leaflet from CDN -->
-    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
-    <script src="https://unpkg.com/esri-leaflet-vector@4.0.0/dist/esri-leaflet-vector.js"></script>
-    <script src="leaflet-zoom-show-hide.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>    <meta http-equiv="X-UA-Compatible" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content= "Jack Larkin">
@@ -82,20 +74,46 @@ z-index: 111;
           <div id="basemaps-wrapper">
 
       <select id="basemaps">
-        <option value="ArcGIS:Community">Community</option>
-        <option value="ArcGIS:Streets">Streets</option>
-        <option value="ArcGIS:Navigation">Navigation</option>
-        <option value="ArcGIS:Topographic">Topographic</option>
-        <option value="ArcGIS:LightGray">Light Gray</option>
-        <option value="ArcGIS:DarkGray">Dark gray</option>
-        <option value="ArcGIS:StreetsRelief">Streets Relief</option>
-        <option value="ArcGIS:Imagery:Standard">Imagery</option>
-        <option value="ArcGIS:ChartedTerritory">ChartedTerritory</option>
-        <option value="ArcGIS:ColoredPencil">ColoredPencil</option>
-        <option value="ArcGIS:Nova">Nova</option>
-        <option value="ArcGIS:Midcentury">Midcentury</option>
-        <option value="OSM:Standard">OSM</option>
-        <option value="OSM:Streets">OSM:Streets</option>
+          <option value="ArcGIS:Community">ArcGIS Community</option>
+          <option value="ArcGIS:Imagery">ArcGIS Imagery</option>
+  <option value="ArcGIS:Imagery:Standard">ArcGIS Imagery Standard</option>
+  <option value="ArcGIS:Imagery:Labels">ArcGIS Imagery Labels</option>
+  <option value="ArcGIS:LightGray">ArcGIS LightGray</option>
+  <option value="ArcGIS:LightGray:Base">ArcGIS LightGray Base</option>
+  <option value="ArcGIS:LightGray:Labels">ArcGIS LightGray Labels</option>
+  <option value="ArcGIS:DarkGray">ArcGIS DarkGray</option>
+  <option value="ArcGIS:DarkGray:Base">ArcGIS DarkGray Base</option>
+  <option value="ArcGIS:DarkGray:Labels">ArcGIS DarkGray Labels</option>
+  <option value="ArcGIS:Navigation">ArcGIS Navigation</option>
+  <option value="ArcGIS:NavigationNight">ArcGIS NavigationNight</option>
+  <option value="ArcGIS:Streets">ArcGIS Streets</option>
+  <option value="ArcGIS:StreetsNight">ArcGIS StreetsNight</option>
+  <option value="ArcGIS:StreetsRelief">ArcGIS StreetsRelief</option>
+  <option value="ArcGIS:StreetsRelief:Base">ArcGIS StreetsRelief Base</option>
+  <option value="ArcGIS:Topographic">ArcGIS Topographic</option>
+  <option value="ArcGIS:Topographic:Base">ArcGIS Topographic Base</option>
+  <option value="ArcGIS:Oceans">ArcGIS Oceans</option>
+  <option value="ArcGIS:Oceans:Base">ArcGIS Oceans Base</option>
+  <option value="ArcGIS:Oceans:Labels">ArcGIS Oceans Labels</option>
+  <option value="OSM:Standard">OSM Standard</option>
+  <option value="OSM:StandardRelief">OSM StandardRelief</option>
+  <option value="OSM:StandardRelief:Base">OSM StandardRelief Base</option>
+  <option value="OSM:Streets">OSM Streets</option>
+  <option value="OSM:StreetsRelief">OSM StreetsRelief</option>
+  <option value="OSM:StreetsRelief:Base">OSM StreetsRelief Base</option>
+  <option value="OSM:LightGray">OSM LightGray</option>
+  <option value="OSM:LightGray:Base">OSM LightGray Base</option>
+  <option value="OSM:LightGray:Labels">OSM LightGray Labels</option>
+  <option value="OSM:DarkGray">OSM DarkGray</option>
+  <option value="OSM-DarkGray:Base">OSM DarkGray Base</option>
+  <option value="OSM-DarkGray:Labels">OSM DarkGray Labels</option>
+  <option value="ArcGIS:Terrain">ArcGIS Terrain</option>
+  <option value="ArcGIS:Terrain:Base">ArcGIS Terrain Base</option>
+  <option value="ArcGIS:Terrain:Detail">ArcGIS Terrain Detail</option>
+  <option value="ArcGIS:Hillshade:Light">Hillshade</option>
+  <option value= "6976148c11bd497d8624206f9ee03e30">Forest and Parks</option>
+  <option value= "659e7c1b1e374f6c8a89eefe17b23380">Outdoor</option>
+          <option value= "ArcGIS:Co">Outdoor</option>
       </select>
 
     </div>
@@ -112,12 +130,23 @@ basemapsDropdown.addEventListener('change', () => {
   const basemapEnum = basemapsDropdown.value;
   
   // Update the map style with the selected basemap
-  map.setStyle(`https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&token=${apiKey}`);
+
+  map.setStyle(`https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&token=${apiKey}`, {
+    // This function runs once the style has finished loading
+    onLoad: function () {
+      // Get the ID of the first layer in the style
+      const layers = map.getStyle().layers;
+      const firstLayerId = layers[0].id;
+
+      // Set the opacity of the first layer in the style
+      map.setPaintProperty(firstLayerId, "raster-opacity", 0.2);
+    }
+  });
  
   map.once("styledata", () => {
   // This code runs once the base style has finished loading.
 
-  map.addSource("hillshade", {
+  map.addSource("NSWtopo", {
     type: "raster",
     tiles: [
       "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
@@ -130,9 +159,9 @@ basemapsDropdown.addEventListener('change', () => {
 
   map.addLayer(
     {
-      id: "hillshade-raster",
+      id: "NSW",
       type: "raster",
-      source: "hillshade"
+      source: "NSWtopo"
     },
 
     bottomLayer.id
@@ -167,12 +196,10 @@ map.addControl(
     showCompass: true
   })
 );
-
-// Add hillshade layer to the map
-map.once("styledata", () => {
+  map.once("load", () => {
   // This code runs once the base style has finished loading.
 
-  map.addSource("hillshade", {
+  map.addSource("NSWtopo", {
     type: "raster",
     tiles: [
       "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
@@ -185,9 +212,9 @@ map.once("styledata", () => {
 
   map.addLayer(
     {
-      id: "hillshade-raster",
+      id: "NSW",
       type: "raster",
-      source: "hillshade"
+      source: "NSWtopo"
     },
 
     bottomLayer.id
@@ -206,7 +233,9 @@ map.once("styledata", () => {
 
 
     </script>
-    
+    <script>
+$("#menu-close").click(function(e){e.preventDefault();$("#sidebar-wrapper").toggleClass("active")});$("#menu-toggle").click(function(e){e.preventDefault();$("#sidebar-wrapper").toggleClass("active")});$(function(){$('a[href*=#]:not([href=#],[data-toggle],[data-target],[data-slide])').click(function(){if(location.pathname.replace(/^\//,'')==this.pathname.replace(/^\//,'')||location.hostname==this.hostname){var target=$(this.hash);target=target.length?target:$('[name='+this.hash.slice(1)+']');if(target.length){$('html,body').animate({scrollTop:target.offset().top},1000);return false}}})});var fixed=false;$(document).scroll(function(){if($(this).scrollTop()>250){if(!fixed){fixed=true;$('#to-top').show("slow",function(){$('#to-top').css({position:'fixed',display:'block'})})}}else{if(fixed){fixed=false;$('#to-top').hide("slow",function(){$('#to-top').css({display:'none'})})}}});
+    </script>
   </body>
 
 </html>

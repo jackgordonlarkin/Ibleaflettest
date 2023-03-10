@@ -5,6 +5,7 @@
      <!-- Load Leaflet from CDN -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
+        <link rel="icon" href="IB.ico">
 
     <!-- Load Esri Leaflet from CDN -->
     <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
@@ -44,7 +45,17 @@ top: 3.5%;
 left: 0;
 width: 422px;
 z-index: 111;
-};
+}
+          #basemaps-wrapper {
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        background: rgba(255, 255, 255, 0);
+      }
+      #basemaps {
+        font-size: 16px;
+        padding: 4px 8px;
+      }
     </style>
     
     <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>
@@ -73,97 +84,114 @@ z-index: 111;
       
 <div id="map"></div>
 
+<div id="basemaps-wrapper">
+    <select id="basemaps">
+      <option value="ArcGIS:Imagery">ArcGIS Imagery</option>
+      <option value="ArcGIS:Imagery:Standard">ArcGIS Imagery Standard</option>
+      <option value="ArcGIS:Imagery:Labels">ArcGIS Imagery Labels</option>
+      <option value="ArcGIS:LightGray">ArcGIS LightGray</option>
+      <option value="ArcGIS:LightGray:Base">ArcGIS LightGray Base</option>
+      <option value="ArcGIS:LightGray:Labels">ArcGIS LightGray Labels</option>
+      <option value="ArcGIS:DarkGray">ArcGIS DarkGray</option>
+      <option value="ArcGIS:DarkGray:Base">ArcGIS DarkGray Base</option>
+      <option value="ArcGIS:DarkGray:Labels">ArcGIS DarkGray Labels</option>
+      <option value="ArcGIS:Navigation">ArcGIS Navigation</option>
+      <option value="ArcGIS:NavigationNight">ArcGIS NavigationNight</option>
+      <option value="ArcGIS:Streets">ArcGIS Streets</option>
+      <option value="ArcGIS:StreetsNight">ArcGIS StreetsNight</option>
+      <option value="ArcGIS:StreetsRelief">ArcGIS StreetsRelief</option>
+      <option value="ArcGIS:StreetsRelief:Base">ArcGIS StreetsRelief Base</option>
+      <option value="ArcGIS:Topographic">ArcGIS Topographic</option>
+      <option value="ArcGIS:Topographic:Base">ArcGIS Topographic Base</option>
+      <option value="ArcGIS:Oceans">ArcGIS Oceans</option>
+      <option value="ArcGIS:Oceans:Base">ArcGIS Oceans Base</option>
+      <option value="ArcGIS:Oceans:Labels">ArcGIS Oceans Labels</option>
+      <option value="OSM:Standard">OSM Standard</option>
+      <option value="OSM:StandardRelief">OSM StandardRelief</option>
+      <option value="OSM:StandardRelief:Base">OSM StandardRelief Base</option>
+      <option value="OSM:Streets">OSM Streets</option>
+      <option value="OSM:StreetsRelief">OSM StreetsRelief</option>
+      <option value="OSM:StreetsRelief:Base">OSM StreetsRelief Base</option>
+      <option value="OSM:LightGray">OSM LightGray</option>
+      <option value="OSM:LightGray:Base">OSM LightGray Base</option>
+      <option value="OSM:LightGray:Labels">OSM LightGray Labels</option>
+      <option value="OSM:DarkGray">OSM DarkGray</option>
+      <option value="OSM-DarkGray:Base">OSM DarkGray Base</option>
+      <option value="OSM-DarkGray:Labels">OSM DarkGray Labels</option>
+      <option value="ArcGIS:Terrain">ArcGIS Terrain</option>
+      <option value="ArcGIS:Terrain:Base">ArcGIS Terrain Base</option>
+      <option value="ArcGIS:Terrain:Detail">ArcGIS Terrain Detail</option>
+      <option value="ArcGIS:Community">ArcGIS Community</option>
+      <option value= "6976148c11bd497d8624206f9ee03e30">Forest and Parks</option>
+    <option value="659e7c1b1e374f6c8a89eefe17b23380">Outdoor</option>
+    </select>
+</div>
+
 <script>
+const apiKey = "AAPK01d3c973b91841e99191a7cb96374713ppA1XdSa_FzdBTpO68P75mXoB6ZHH8JMoore66SKKVDlcN39rMGtvZS59A1c8rEU";
 
-  const apiKey = "AAPK01d3c973b91841e99191a7cb96374713ppA1XdSa_FzdBTpO68P75mXoB6ZHH8JMoore66SKKVDlcN39rMGtvZS59A1c8rEU";
-  
-  const map = L.map('map', {
-    center: [-35.027, 149.805]
-  });
-      const vectorTiles = {};
-      const allEnums = [
-        "ArcGIS:Imagery",
-        "ArcGIS:Imagery:Standard",
-        "ArcGIS:Imagery:Labels",
-        "ArcGIS:LightGray",
-        "ArcGIS:LightGray:Base",
-        "ArcGIS:LightGray:Labels",
-        "ArcGIS:DarkGray",
-        "ArcGIS:DarkGray:Base",
-        "ArcGIS:DarkGray:Labels",
-        "ArcGIS:Navigation",
-        "ArcGIS:NavigationNight",
-        "ArcGIS:Streets",
-        "ArcGIS:StreetsNight",
-        "ArcGIS:StreetsRelief",
-        "ArcGIS:StreetsRelief:Base",
-        "ArcGIS:Topographic",
-        "ArcGIS:Topographic:Base",
-        "ArcGIS:Oceans",
-        "ArcGIS:Oceans:Base",
-        "ArcGIS:Oceans:Labels",
-        "OSM:Standard",
-        "OSM:StandardRelief",
-        "OSM:StandardRelief:Base",
-        "OSM:Streets",
-        "OSM:StreetsRelief",
-        "OSM:StreetsRelief:Base",
-        "OSM:LightGray",
-        "OSM:LightGray:Base",
-        "OSM:LightGray:Labels",
-        "OSM:DarkGray",
-        "OSM-DarkGray:Base",
-        "OSM-DarkGray:Labels",
-        "ArcGIS:Terrain",
-        "ArcGIS:Terrain:Base",
-        "ArcGIS:Terrain:Detail",
-        "ArcGIS:Community",
-        "ArcGIS:ChartedTerritory",
-        "ArcGIS:ChartedTerritory:Base",
-        "ArcGIS:ColoredPencil",
-        "ArcGIS:Nova",
-        "ArcGIS:ModernAntique",
-        "ArcGIS:ModernAntique:Base",
-        "ArcGIS:Midcentury",
-        "ArcGIS:Newspaper",
-        "ArcGIS:Hillshade:Light",
-        "ArcGIS:Hillshade:Dark"
-      ];
+const map = L.map('map', {
+  center: [-35.027, 149.805]
+});
 
-      // the L.esri.Vector.vectorBasemapLayer basemap enum defaults to 'ArcGIS:Streets' if omitted
-      vectorTiles.Default = L.esri.Vector.vectorBasemapLayer(null, {
-        apiKey
-      });
-      allEnums.forEach((enumString) => {
-        vectorTiles[enumString] = L.esri.Vector.vectorBasemapLayer(enumString, {
-          apiKey
-        });
-      });
+// Set up the basemap layer
+var basemapLayer = L.esri.Vector.vectorBasemapLayer("ArcGIS:Imagery", {
+  apikey: apiKey
+}).addTo(map);
 
-      L.control
-        .layers(vectorTiles, null, {
-          collapsed: false
-        })
-        .addTo(map);
+// Get the basemaps dropdown element
+const basemapsDropdown = document.getElementById('basemaps');
 
-vectorTiles.Default.addTo(map);
+// Update the basemap layer when the dropdown value changes
+basemapsDropdown.addEventListener('change', () => {
+  // Get the selected basemap value
+  const basemapEnum = basemapsDropdown.value;
+  console.log(basemapEnum)
+  // Remove the current basemap layer
+  basemapLayer.remove();
 
-  map.setView([-35.027, 149.805], 13);
-  zsh = new ZoomShowHide();
-  zsh.addTo(map);
-  const NSWTopo25 = L.esri.tiledMapLayer({
-    url: "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer",
-    apiKey: apiKey,
-    detectRetina: true,
-    maxZoom: 16
-  });
-  NSWTopo25.min_zoom = 12;
-  zsh.addLayer(NSWTopo25);
-  map.getPane("tilePane").style.zIndex = 800;
+  // Add the new basemap layer
+  basemapLayer = L.esri.Vector.vectorBasemapLayer(basemapEnum, {
+    apikey: apiKey
+  }).addTo(map);
+});
+
+// Set up the NSW Topo 25 layer
+const NSWTopo25 = L.esri.tiledMapLayer({
+  url: "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer",
+  apiKey: apiKey,
+  detectRetina: true,
+  maxZoom: 21,
+  minZoom: 10
+});
+
+// Show the NSW Topo 25 layer at zoom level 11 and above
+map.on('zoomend', function() {
+  if (map.getZoom() >= 12 && map.getZoom() <= NSWTopo25.options.maxZoom) {
+    NSWTopo25.addTo(map);
+  } else if (map.getZoom() > NSWTopo25.options.maxZoom) {
+    map.setView(map.getCenter(), NSWTopo25.options.maxZoom);
+    NSWTopo25.addTo(map);
+  } else {
+    NSWTopo25.removeFrom(map);
+  }
+});
+
+// Add the NSW Topo 25 layer to the map
+NSWTopo25.addTo(map);
+
+// Set the z-index of the tile pane to 800
+map.getPane("tilePane").style.zIndex = 800;
+
+// Set the initial map view
+map.setView([-35.027, 149.805], 13);
+
+// Add the ZoomShowHide control
+const zsh = new ZoomShowHide();
+zsh.addTo(map);
+</script>
 
 
-      </script>
-        
       <script>
 $("#menu-close").click(function(e){e.preventDefault();$("#sidebar-wrapper").toggleClass("active")});$("#menu-toggle").click(function(e){e.preventDefault();$("#sidebar-wrapper").toggleClass("active")});$(function(){$('a[href*=#]:not([href=#],[data-toggle],[data-target],[data-slide])').click(function(){if(location.pathname.replace(/^\//,'')==this.pathname.replace(/^\//,'')||location.hostname==this.hostname){var target=$(this.hash);target=target.length?target:$('[name='+this.hash.slice(1)+']');if(target.length){$('html,body').animate({scrollTop:target.offset().top},1000);return false}}})});var fixed=false;$(document).scroll(function(){if($(this).scrollTop()>250){if(!fixed){fixed=true;$('#to-top').show("slow",function(){$('#to-top').css({position:'fixed',display:'block'})})}}else{if(fixed){fixed=false;$('#to-top').hide("slow",function(){$('#to-top').css({display:'none'})})}}});
     </script>
