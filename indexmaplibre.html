@@ -247,7 +247,7 @@ map.addControl(nav, 'top-left');
     bottomLayer.id
 
   );
-  map.on("zoom", () => {
+  map.on("zoomend", () => {
     var zoom = map.getZoom();
     layers.forEach((layer) => {
           if (layer.id !== "NSW" && layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
