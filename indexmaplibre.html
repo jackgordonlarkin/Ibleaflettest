@@ -113,7 +113,9 @@ z-index: 111;
   <option value="ArcGIS:Hillshade:Light">Hillshade</option>
   <option value= "6976148c11bd497d8624206f9ee03e30">Forest and Parks</option>
   <option value= "659e7c1b1e374f6c8a89eefe17b23380">Outdoor</option>
-          <option value= "ArcGIS:Co">Outdoor</option>
+  <option value= "ArcGIS:ColoredPencil">Silly Pencil Map</option>
+<option value= "ArcGIS:Nove">Silly Future Map</option>
+          <option value= "ArcGIS:Nove">Silly Newspaper Map</option>
       </select>
 
     </div>
@@ -139,7 +141,7 @@ basemapsDropdown.addEventListener('change', () => {
       const firstLayerId = layers[0].id;
 
       // Set the opacity of the first layer in the style
-      map.setPaintProperty(firstLayerId, "raster-opacity", 0.2);
+      map.setPaintProperty(firstLayerId, "raster-opacity", 0.5);
     }
   });
  
