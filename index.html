@@ -5,7 +5,7 @@
      <!-- Load Leaflet from CDN -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
-        <link rel="icon" href="IB.ico">
+    <link rel="icon" href="IB.ico">
 
     <!-- Load Esri Leaflet from CDN -->
     <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
@@ -149,7 +149,6 @@ const basemapsDropdown = document.getElementById('basemaps');
 basemapsDropdown.addEventListener('change', () => {
   // Get the selected basemap value
   const basemapEnum = basemapsDropdown.value;
-  console.log(basemapEnum)
   // Remove the current basemap layer
   basemapLayer.remove();
 
