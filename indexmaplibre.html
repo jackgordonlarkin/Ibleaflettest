@@ -41,14 +41,16 @@ z-index: 111;
           #basemaps-wrapper {
         position: absolute;
         top: 20px;
-        left: 20px;
+        left: 50px;
         background: rgba(255, 255, 255, 0);
       }
       #basemaps {
         font-size: 16px;
         padding: 4px 8px;
       }
-    </style>
+
+}
+</style>
 <script src=https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js></script>
     <link href=https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css rel="stylesheet" />
 <script src ="https://unpkg.com/mapbox-gl-esri-sources/dist/mapbox-gl-esri-services"></script>
@@ -71,6 +73,8 @@ z-index: 111;
            
         </ul>
     </nav>
+<div id="custom-nav-container"></div>
+
 <div id="map"></div>
           <div id="basemaps-wrapper">
 
@@ -118,10 +122,27 @@ z-index: 111;
 <option value= "ArcGIS:Nova">Silly Future Map</option>
 <option value= "ArcGIS:Newspaper">Silly Newspaper Map</option>
       </select>
-
     </div>
     <script>
-
+function getMarkerOpacity(zoom) {
+  if (zoom < 5) {
+    return 1;
+  } else if (zoom > 21) {
+    return 0.1;
+  } else {
+    return 1 - (zoom - 5) / 16;
+  }
+};
+function getFillOpacity(zoom) {
+  if (zoom <= 6) {
+    return 0.6;
+  } else if (zoom >= 15) {
+    return 0.2;
+  } else {
+    // Calculate the fill opacity on a linear scale between 0.6 and 0.2
+    return 0.6 - ((zoom - 6) / 9) * 0.4;
+  }
+};
      const apiKey = "AAPK01d3c973b91841e99191a7cb96374713ppA1XdSa_FzdBTpO68P75mXoB6ZHH8JMoore66SKKVDlcN39rMGtvZS59A1c8rEU";
 
 // Get the basemaps dropdown element
@@ -170,17 +191,21 @@ basemapsDropdown.addEventListener('change', () => {
     bottomLayer.id
 
   );
-
-  layers.forEach((layer) => {
-    if (layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
-      map.setPaintProperty(layer.id, "fill-opacity", 0.2);
-    }
-  });
+   var zoom = map.getZoom();
+   layers.forEach((layer) => {
+          if (layer.id !== "NSW" && layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
+            map.setPaintProperty(layer.id, "fill-opacity", getFillOpacity(zoom));
+          } else if (layer.id !== "NSW" && layer.type === "line") {
+            map.setPaintProperty(layer.id, "line-opacity", getMarkerOpacity(zoom));
+          } else if (layer.id !== "NSW" && layer.type === "symbol") {
+            map.setPaintProperty(layer.id, "icon-opacity", getMarkerOpacity(zoom));
+          }
+        });
     
 
+  });
 });
- 
-});
+
 
 // Create the map with the initial basemap
 let basemapEnum = basemapsDropdown.value;
@@ -192,14 +217,12 @@ const map = new maplibregl.Map({
 });
 
 // Add navigation control to the map
-map.addControl(
-  new maplibregl.NavigationControl({
+var nav = new maplibregl.NavigationControl({
     visualizePitch: true,
     showZoom: true,
-    showCompass: true,
-    position: "bottom-right"
-  })
-);
+    showCompass: true
+  });
+map.addControl(nav, 'top-left');
   map.once("load", () => {
   // This code runs once the base style has finished loading.
 
@@ -224,12 +247,30 @@ map.addControl(
     bottomLayer.id
 
   );
-
-  layers.forEach((layer) => {
-    if (layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
-      map.setPaintProperty(layer.id, "fill-opacity", 0.2);
-    }
-  });
+  map.on("zoom", () => {
+    var zoom = map.getZoom();
+    layers.forEach((layer) => {
+          if (layer.id !== "NSW" && layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
+            map.setPaintProperty(layer.id, "fill-opacity", getFillOpacity(zoom));
+          } else if (layer.id !== "NSW" && layer.type === "line") {
+            map.setPaintProperty(layer.id, "line-opacity", getMarkerOpacity(zoom));
+          } else if (layer.id !== "NSW" && layer.type === "symbol") {
+            map.setPaintProperty(layer.id, "icon-opacity", getMarkerOpacity(zoom));
+          }
+        });
+      });
+   var zoom = map.getZoom();
+   layers.forEach((layer) => {
+          if (layer.id !== "NSW" && layer.type === "fill" && !layer.id.match(/(Marine area)/)) {
+            map.setPaintProperty(layer.id, "fill-opacity", getFillOpacity(zoom));
+          } else if (layer.id !== "NSW" && layer.type === "line") {
+            map.setPaintProperty(layer.id, "line-opacity", getMarkerOpacity(zoom));
+          } else if (layer.id !== "NSW" && layer.type === "symbol") {
+            map.setPaintProperty(layer.id, "icon-opacity", getMarkerOpacity(zoom));
+          }
+        });
+ 
+      
     
 
 });
